@@ -87,6 +87,31 @@ def plaster_bump():
         nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
 
 
+def translucent_leaves():
+    """Leaves let some light through: mix in a translucent BSDF, keep the alpha cut-out."""
+    for name in ("LeafOlive", "LeafBroad"):
+        m = bpy.data.materials.get(name)
+        if not m:
+            continue
+        nt = m.node_tree
+        out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
+        bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+        img = next(n for n in nt.nodes if n.type == "TEX_IMAGE")
+        rnd = next(n for n in nt.nodes if n.type == "MATH")
+        tl = nt.nodes.new("ShaderNodeBsdfTranslucent")
+        nt.links.new(img.outputs["Color"], tl.inputs["Color"])
+        mix = nt.nodes.new("ShaderNodeMixShader")
+        mix.inputs[0].default_value = 0.35
+        nt.links.new(bsdf.outputs[0], mix.inputs[1])
+        nt.links.new(tl.outputs[0], mix.inputs[2])
+        cut = nt.nodes.new("ShaderNodeMixShader")
+        tr = nt.nodes.new("ShaderNodeBsdfTransparent")
+        nt.links.new(rnd.outputs[0], cut.inputs[0])
+        nt.links.new(tr.outputs[0], cut.inputs[1])
+        nt.links.new(mix.outputs[0], cut.inputs[2])
+        nt.links.new(cut.outputs[0], out.inputs["Surface"])
+
+
 def set_emission(name, strength):
     m = bpy.data.materials.get(name)
     if not m:
@@ -115,6 +140,7 @@ def main(ids):
     setup_cycles()
     thin_glass()
     plaster_bump()
+    translucent_leaves()
     os.makedirs(OUT, exist_ok=True)
     for v in build_scene.VIEWS:
         if ids and v["id"] not in ids:

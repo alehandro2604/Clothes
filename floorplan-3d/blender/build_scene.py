@@ -28,7 +28,7 @@ ROOT = os.path.dirname(HERE)
 WEB = os.path.join(ROOT, "web")
 TEX = os.path.join(WEB, "tex")
 sys.path.insert(0, HERE)
-from textures import TILE_METERS  # noqa: E402
+from textures import FABRIC_NORMAL_TILE, TILE_METERS  # noqa: E402
 
 PX = 60.0
 CX, CY = 965.0, 605.0
@@ -69,7 +69,8 @@ def set_input(node, names, value):
 
 
 def pmat(name, color="#ffffff", rough=0.5, metal=0.0, tex=None, transmission=0.0,
-         emit=None, emit_strength=0.0, sheen=0.0, coat=0.0, alpha=1.0, tile=1.0):
+         emit=None, emit_strength=0.0, sheen=0.0, coat=0.0, alpha=1.0, tile=1.0,
+         normal=None, nstrength=0.5, leaf=None):
     m = bpy.data.materials.new(name)
     try:
         m.use_nodes = True
@@ -99,6 +100,31 @@ def pmat(name, color="#ffffff", rough=0.5, metal=0.0, tex=None, transmission=0.0
         tn.location = (-400, 200)
         nt.links.new(tn.outputs["Color"], bsdf.inputs["Base Color"])
         tile = TILE_METERS[tex]
+    if normal:
+        img = bpy.data.images.load(os.path.join(TEX, normal), check_existing=True)
+        img.colorspace_settings.name = "Non-Color"
+        tn = nt.nodes.new("ShaderNodeTexImage")
+        tn.image = img
+        nm = nt.nodes.new("ShaderNodeNormalMap")
+        nm.inputs["Strength"].default_value = nstrength
+        nt.links.new(tn.outputs["Color"], nm.inputs["Color"])
+        nt.links.new(nm.outputs["Normal"], bsdf.inputs["Normal"])
+        tile = FABRIC_NORMAL_TILE
+    if leaf:
+        img = bpy.data.images.load(os.path.join(TEX, leaf), check_existing=True)
+        tn = nt.nodes.new("ShaderNodeTexImage")
+        tn.image = img
+        rnd = nt.nodes.new("ShaderNodeMath")
+        rnd.operation = "ROUND"
+        nt.links.new(tn.outputs["Color"], bsdf.inputs["Base Color"])
+        nt.links.new(tn.outputs["Alpha"], rnd.inputs[0])
+        nt.links.new(rnd.outputs[0], bsdf.inputs["Alpha"])
+        m.use_backface_culling = False
+        for attr, val in (("blend_method", "CLIP"), ("surface_render_method", "DITHERED")):
+            try:
+                setattr(m, attr, val)
+            except Exception:
+                pass
     m.diffuse_color = hex_lin(color)
     MATS[name] = m
     TILE[name] = tile
@@ -114,8 +140,8 @@ def build_materials():
     pmat("Asphalt", "#4A4B4D", 0.9)
     pmat("Pavement", "#CFC7B6", 0.9, tex="limestone")
     # furniture & fittings
-    pmat("Oak", "#B98D5F", 0.5)
-    pmat("Walnut", "#5B3F2C", 0.45)
+    pmat("Oak", "#B98D5F", 0.45, tex="woodlight", coat=0.15)
+    pmat("Walnut", "#5B3F2C", 0.4, tex="wooddark", coat=0.2)
     pmat("Joinery", "#ECE7DE", 0.55)
     pmat("Cabinet", "#4F6B5E", 0.45)
     pmat("CabinetCarcass", "#2A2C2B", 0.6)
@@ -132,26 +158,30 @@ def build_materials():
     pmat("Frame", "#353738", 0.4, metal=0.5)
     pmat("DoorWhite", "#F1EEE8", 0.5)
     pmat("FrontDoor", "#2F5D4E", 0.4)
-    pmat("Sofa", "#8D8F86", 0.95, sheen=0.5)
-    pmat("Linen", "#F2EFE9", 0.9, sheen=0.4)
-    pmat("Duvet", "#E7E1D6", 0.95, sheen=0.4)
-    pmat("Throw", "#C27C55", 0.95, sheen=0.5)
-    pmat("Accent", "#3F5E73", 0.9, sheen=0.4)
-    pmat("Mustard", "#C9973E", 0.9, sheen=0.4)
-    pmat("Upholstery", "#BFB3A1", 0.95, sheen=0.4)
+    pmat("Sofa", "#8D8F86", 0.95, sheen=0.6, normal="fabric_n.png", nstrength=0.55)
+    pmat("Linen", "#F2EFE9", 0.95, sheen=0.6, normal="fabric_n.png", nstrength=0.55)
+    pmat("Duvet", "#E7E1D6", 0.95, sheen=0.6, normal="fabric_n.png", nstrength=0.55)
+    pmat("Throw", "#C27C55", 0.95, sheen=0.6, normal="fabric_n.png", nstrength=0.55)
+    pmat("Accent", "#3F5E73", 0.95, sheen=0.6, normal="fabric_n.png", nstrength=0.55)
+    pmat("Mustard", "#C9973E", 0.95, sheen=0.6, normal="fabric_n.png", nstrength=0.55)
+    pmat("Upholstery", "#BFB3A1", 0.95, sheen=0.6, normal="fabric_n.png", nstrength=0.55)
     pmat("Leather", "#7A4A2E", 0.45)
     pmat("Rubber", "#1B1B1C", 0.85)
     pmat("PlasticDark", "#2B2D2F", 0.5)
-    pmat("Rug", "#D6CBB8", 1.0)
-    pmat("RugBlue", "#5B7188", 1.0)
+    pmat("Rug", "#D6CBB8", 1.0, normal="fabric_n.png", nstrength=1.0)
+    pmat("RugBlue", "#5B7188", 1.0, normal="fabric_n.png", nstrength=1.0)
+    pmat("Curtain", "#EEE8DC", 1.0, sheen=0.6, normal="fabric_n.png", nstrength=0.4)
+    MATS["Curtain"].use_backface_culling = False
+    pmat("LeafOlive", "#8A9A6E", 0.5, leaf="leaf_olive.png")
+    pmat("LeafBroad", "#3F6B35", 0.45, leaf="leaf_broad.png", coat=0.3)
     pmat("Leaf", "#3E6A3A", 0.6)
     pmat("LeafLight", "#6E8F4E", 0.6)
     pmat("Pot", "#B5653F", 0.8)
     pmat("PotWhite", "#EDEBE6", 0.5)
     pmat("Soil", "#3B2E25", 1.0)
-    pmat("Bark", "#6E5A48", 0.9)
+    pmat("Bark", "#6B5A4A", 0.95)
     pmat("Wicker", "#9A7650", 0.85)
-    pmat("Cushion", "#ECE6DA", 0.95, sheen=0.4)
+    pmat("Cushion", "#ECE6DA", 0.95, sheen=0.6, normal="fabric_n.png", nstrength=0.55)
     pmat("Canvas", "#F0EBE0", 0.9)
     pmat("LampShade", "#F6EBD8", 0.8, emit="#FFD9A0", emit_strength=0.0)
     pmat("Bulb", "#FFF4E0", 0.3, emit="#FFE2B0", emit_strength=4.0)
@@ -291,6 +321,71 @@ class Builder:
                             ((j + 1) / n, (i + 1) / rings), ((j + 1) / n, i / rings)])
         self._add(verts, faces, uvs, mat, smooth=True)
 
+    def rbox(self, center, size, mat, rot=(0, 0, 0), e=0.25, puff=0.0, sag=0.0, n=24):
+        """Rounded box / cushion (superellipsoid). e: 0.1 boxy .. 1 ellipsoid.
+        puff thins the edges like a pillow; sag dips the top in the middle."""
+        a, b_, c = (max(1e-4, v / 2) for v in size)
+        R = Euler(tuple(math.radians(v) for v in rot)).to_matrix()
+        rings = max(6, n // 2)
+
+        def cp(w, m):
+            cw = math.cos(w)
+            return math.copysign(abs(cw) ** m, cw)
+
+        def sp(w, m):
+            sw = math.sin(w)
+            return math.copysign(abs(sw) ** m, sw)
+
+        verts = []
+        for i in range(rings + 1):
+            v = -math.pi / 2 + math.pi * i / rings
+            for j in range(n):
+                u = -math.pi + 2 * math.pi * j / n
+                x = a * cp(v, e) * cp(u, e)
+                y = b_ * cp(v, e) * sp(u, e)
+                z = c * sp(v, e)
+                if puff:
+                    z *= 1 - puff * 0.5 * ((x / a) ** 4 + (y / b_) ** 4)
+                if sag and z > 0:
+                    z -= sag * c * (1 - (x / a) ** 2) * (1 - (y / b_) ** 2)
+                verts.append(tuple(Vector(center) + R @ Vector((x, y, z))))
+        t = TILE.get(mat, 1.0)
+        per = 4 * (a + b_) / t
+        hgt = 2 * c / t + (a + b_) / t
+        faces, uvs = [], []
+        for i in range(rings):
+            for j in range(n):
+                faces.append((i * n + j, i * n + (j + 1) % n, (i + 1) * n + (j + 1) % n, (i + 1) * n + j))
+                uvs.append([(per * j / n, hgt * i / rings), (per * (j + 1) / n, hgt * i / rings),
+                            (per * (j + 1) / n, hgt * (i + 1) / rings), (per * j / n, hgt * (i + 1) / rings)])
+        self._add(verts, faces, uvs, mat, smooth=True)
+
+    def tube(self, p0, p1, r0, r1, mat, n=8):
+        p0, p1 = Vector(p0), Vector(p1)
+        d = p1 - p0
+        L = d.length
+        if L < 1e-5:
+            return
+        M = d.to_track_quat("Z", "Y").to_matrix()
+        verts, faces, uvs = [], [], []
+        t = TILE.get(mat, 1.0)
+        for k in range(n):
+            a = 2 * math.pi * k / n
+            verts.append(tuple(p0 + M @ Vector((math.cos(a) * r0, math.sin(a) * r0, 0))))
+            verts.append(tuple(p1 + M @ Vector((math.cos(a) * r1, math.sin(a) * r1, 0))))
+        for k in range(n):
+            j = (k + 1) % n
+            faces.append((2 * k, 2 * j, 2 * j + 1, 2 * k + 1))
+            uvs.append([(k / n * 0.3 / t, 0), ((k + 1) / n * 0.3 / t, 0), ((k + 1) / n * 0.3 / t, L / t), (k / n * 0.3 / t, L / t)])
+        self._add(verts, faces, uvs, mat, smooth=True)
+
+    def card(self, base, w, h, mat, rot=(0, 0, 0)):
+        """Leaf card: a quad standing on `base`, textured with an alpha-masked sprig."""
+        R = Euler(tuple(math.radians(v) for v in rot)).to_matrix()
+        loc = [(-w / 2, 0, 0), (w / 2, 0, 0), (w / 2, 0, h), (-w / 2, 0, h)]
+        verts = [tuple(Vector(base) + R @ Vector(p)) for p in loc]
+        self._add(verts, [(0, 1, 2, 3)], [[(0, 0), (1, 0), (1, 1), (0, 1)]], mat)
+
     def build(self, name, loc=(0, 0, 0), rotz=0.0, bevel=0.0, collection=None):
         me = bpy.data.meshes.new(name)
         me.from_pydata(self.v, [], self.f)
@@ -309,12 +404,16 @@ class Builder:
         ob.rotation_euler = (0, 0, math.radians(rotz))
         (collection or bpy.context.scene.collection).objects.link(ob)
         if bevel > 0:
+            for poly in me.polygons:
+                poly.use_smooth = True
             mod = ob.modifiers.new("Bevel", "BEVEL")
             mod.width = bevel
-            mod.segments = 2
+            mod.segments = 3
             mod.limit_method = "ANGLE"
-            mod.angle_limit = math.radians(40)
-            mod.harden_normals = False
+            mod.angle_limit = math.radians(50)
+            wn = ob.modifiers.new("WeightedNormal", "WEIGHTED_NORMAL")
+            wn.keep_sharp = True
+            wn.mode = "FACE_AREA"
         return ob
 
 
@@ -642,29 +741,47 @@ def build_walls():
 
 # --------------------------------------------------------------- furniture
 def bed(b, w=1.6, l=2.05):
-    b.box(-w / 2 + 0.06, w / 2 - 0.06, -l / 2 + 0.06, l / 2 - 0.06, 0, 0.1, "Walnut")
-    b.box(-w / 2 - 0.04, w / 2 + 0.04, -l / 2, l / 2, 0.1, 0.32, "Upholstery")
-    b.box(-w / 2, w / 2, -l / 2 + 0.03, l / 2 - 0.05, 0.32, 0.55, "Linen")
-    b.box(-w / 2 - 0.03, w / 2 + 0.03, -l / 2 - 0.02, l / 2 - 0.6, 0.5, 0.6, "Duvet")
-    b.box(-w / 2 - 0.04, w / 2 + 0.04, -l / 2 - 0.03, -l / 2 + 0.5, 0.58, 0.63, "Throw")
+    b.box(-w / 2 + 0.1, w / 2 - 0.1, -l / 2 + 0.1, l / 2 - 0.1, 0, 0.09, "Walnut")
+    b.rbox((0, 0.02, 0.21), (w + 0.1, l + 0.02, 0.24), "Upholstery", e=0.18)
+    b.rbox((0, 0, 0.43), (w, l - 0.06, 0.24), "Linen", e=0.16)
+    # duvet: quilted top with draped sides
+    dl = l - 0.52
+    yc = -l / 2 + dl / 2 - 0.03
+    b.rbox((0, yc, 0.575), (w + 0.07, dl, 0.11), "Duvet", e=0.32, puff=0.35, sag=0.25, n=32)
     for s in (-1, 1):
-        b.boxr((s * w / 4, l / 2 - 0.3, 0.64), (w / 2 - 0.12, 0.36, 0.16), "Linen", rot=(-12, 0, 0))
-    b.boxr((0.0, l / 2 - 0.5, 0.66), (0.45, 0.14, 0.32), "Accent", rot=(-15, 0, 0))
-    b.box(-w / 2 - 0.08, w / 2 + 0.08, l / 2 - 0.02, l / 2 + 0.07, 0.1, 1.2, "Upholstery")
+        b.rbox((s * (w / 2 + 0.035), yc, 0.43), (0.05, dl, 0.34), "Duvet", e=0.4)
+    b.rbox((0, -l / 2 - 0.035, 0.43), (w + 0.12, 0.05, 0.34), "Duvet", e=0.4)
+    # folded throw over the foot
+    b.rbox((0, -l / 2 + 0.24, 0.64), (w + 0.12, 0.44, 0.05), "Throw", e=0.3, puff=0.25)
+    for s in (-1, 1):
+        b.rbox((s * (w / 2 + 0.07), -l / 2 + 0.24, 0.5), (0.04, 0.44, 0.3), "Throw", e=0.4)
+    # pillows propped against the headboard, plus a cushion in front
+    for s in (-1, 1):
+        b.rbox((s * w / 4, l / 2 - 0.26, 0.69), (w / 2 - 0.08, 0.44, 0.2), "Linen", rot=(24, 0, s * 3), e=0.55, puff=0.75)
+    b.rbox((0, l / 2 - 0.5, 0.71), (0.46, 0.42, 0.14), "Accent", rot=(72, 0, 0), e=0.55, puff=0.8)
+    # channel-tufted headboard
+    n = 7
+    cw = (w + 0.16) / n
+    for i in range(n):
+        x = -w / 2 - 0.08 + cw * (i + 0.5)
+        b.rbox((x, l / 2 + 0.02, 0.68), (cw - 0.004, 0.11, 1.0), "Upholstery", e=0.4)
+    b.box(-w / 2 - 0.08, w / 2 + 0.08, l / 2 + 0.05, l / 2 + 0.09, 0.12, 1.16, "Walnut")
 
 
 def nightstand(b, lamp=True):
-    b.box(-0.24, 0.24, -0.2, 0.2, 0.15, 0.55, "Oak")
-    for sx in (-0.2, 0.2):
-        for sy in (-0.16, 0.16):
-            b.cyl(sx, sy, 0, 0.15, 0.015, "Walnut", n=8)
-    b.box(-0.2, 0.2, -0.205, -0.2, 0.36, 0.38, "Walnut")
+    b.rbox((0, 0, 0.36), (0.48, 0.4, 0.38), "Oak", e=0.12)
+    b.rbox((0, -0.2, 0.43), (0.42, 0.012, 0.13), "Walnut", e=0.2)
+    b.box(-0.05, 0.05, -0.215, -0.205, 0.425, 0.435, "Brass")
+    for sx in (-0.19, 0.19):
+        for sy in (-0.15, 0.15):
+            b.cyl(sx, sy, 0, 0.17, 0.012, "Walnut", r_top=0.018, n=10)
     if lamp:
-        b.cyl(0.05, 0.02, 0.55, 0.58, 0.07, "Brass")
-        b.cyl(0.05, 0.02, 0.58, 0.86, 0.01, "Brass", n=8)
-        b.cyl(0.05, 0.02, 0.78, 0.99, 0.15, "LampShade", r_top=0.11)
-        b.sph(0.05, 0.02, 0.84, 0.04, "Bulb", n=8)
-    b.box(-0.18, -0.02, -0.08, 0.1, 0.55, 0.6, "Book2")
+        b.rbox((0.06, 0.03, 0.66), (0.17, 0.17, 0.22), "Ceramic", e=0.9)
+        b.cyl(0.06, 0.03, 0.76, 0.86, 0.008, "Brass", n=8)
+        b.cyl(0.06, 0.03, 0.82, 1.02, 0.15, "LampShade", r_top=0.12, n=32, caps=False)
+        b.sph(0.06, 0.03, 0.88, 0.035, "Bulb", n=10)
+    b.rbox((-0.1, -0.02, 0.57), (0.16, 0.22, 0.03), "Book2", e=0.15)
+    b.rbox((-0.1, -0.02, 0.6), (0.15, 0.2, 0.025), "Book3", e=0.15)
 
 
 def wardrobe(b, w, h=2.3, d=0.6):
@@ -679,29 +796,33 @@ def wardrobe(b, w, h=2.3, d=0.6):
 
 
 def sofa(b, w=2.2, d=0.95, mat="Sofa"):
-    b.box(-w / 2, w / 2, -d / 2, d / 2, 0.1, 0.42, mat)
-    b.box(-w / 2, w / 2, d / 2 - 0.22, d / 2, 0.42, 0.82, mat)
+    arm = 0.2
+    b.rbox((0, 0.01, 0.25), (w, d, 0.28), mat, e=0.18)
     for s in (-1, 1):
-        b.box(s * w / 2 - (0.18 if s > 0 else 0), s * w / 2 + (0.18 if s < 0 else 0), -d / 2, d / 2, 0.1, 0.62, mat)
-    inner = w - 0.36
-    n = 3 if w > 2 else 2
+        b.rbox((s * (w / 2 - arm / 2), 0.0, 0.39), (arm, d + 0.01, 0.56), mat, e=0.35)
+    b.rbox((0, d / 2 - 0.1, 0.6), (w - 0.06, 0.2, 0.44), mat, e=0.3)
+    inner = w - 2 * arm
+    n = 3 if w > 2 else (2 if w > 1.2 else 1)
     cw = inner / n
     for i in range(n):
-        x0 = -inner / 2 + i * cw
-        b.box(x0 + 0.01, x0 + cw - 0.01, -d / 2 + 0.03, d / 2 - 0.22, 0.42, 0.55, mat)
-        b.boxr((x0 + cw / 2, d / 2 - 0.3, 0.7), (cw - 0.03, 0.18, 0.4), mat, rot=(-10, 0, 0))
-    b.boxr((-inner / 2 + 0.25, d / 2 - 0.42, 0.72), (0.42, 0.13, 0.42), "Mustard", rot=(-14, 0, 12))
-    b.boxr((inner / 2 - 0.25, d / 2 - 0.42, 0.72), (0.42, 0.13, 0.42), "Throw", rot=(-14, 0, -10))
-    for sx in (-w / 2 + 0.08, w / 2 - 0.08):
-        for sy in (-d / 2 + 0.08, d / 2 - 0.08):
-            b.cyl(sx, sy, 0, 0.1, 0.02, "Walnut", n=8)
+        x = -inner / 2 + cw * (i + 0.5)
+        b.rbox((x, -0.1, 0.47), (cw - 0.015, d - 0.24, 0.17), mat, e=0.3, puff=0.35, sag=0.18, n=28)
+        b.rbox((x, d / 2 - 0.29, 0.75), (cw - 0.03, 0.5, 0.2), mat, rot=(76, 0, 0), e=0.4, puff=0.55, n=28)
+    if w > 1.2:
+        b.rbox((-inner / 2 + 0.24, d / 2 - 0.46, 0.72), (0.44, 0.44, 0.15), "Mustard", rot=(68, 0, 14), e=0.55, puff=0.85)
+        b.rbox((inner / 2 - 0.24, d / 2 - 0.46, 0.72), (0.44, 0.44, 0.15), "Throw", rot=(68, 0, -12), e=0.55, puff=0.85)
+    for sx in (-w / 2 + 0.1, w / 2 - 0.1):
+        for sy in (-d / 2 + 0.1, d / 2 - 0.1):
+            b.cyl(sx, sy, 0, 0.11, 0.014, "Walnut", r_top=0.022, n=10)
 
 
 def coffee_table(b, w=1.0, d=0.55):
-    b.cyl(0, 0, 0.36, 0.4, w / 2, "Counter", sy=d / w, n=32)
-    b.cyl(0, 0, 0, 0.36, 0.14, "Walnut", sy=d / w * 1.3, n=20)
-    b.box(-0.2, 0.05, -0.1, 0.12, 0.4, 0.46, "Book1")
-    b.cyl(0.25, 0.0, 0.4, 0.55, 0.06, "PotWhite")
+    b.cyl(0, 0, 0.36, 0.4, w / 2, "Counter", sy=d / w, n=48)
+    b.cyl(0, 0, 0, 0.36, 0.14, "Walnut", sy=d / w * 1.3, n=24, r_top=0.11)
+    b.rbox((-0.12, 0.0, 0.415), (0.26, 0.2, 0.03), "Book1", e=0.15)
+    b.rbox((-0.12, 0.0, 0.44), (0.22, 0.17, 0.025), "Book3", e=0.15)
+    b.cyl(0.24, 0.0, 0.4, 0.52, 0.055, "Ceramic", r_top=0.04, n=20)
+    sprigs(b, 0.24, 0.0, 0.5, 0.22, 5, "LeafBroad")
 
 
 def tv_unit(b, w=1.8):
@@ -713,20 +834,20 @@ def tv_unit(b, w=1.8):
         b.cyl(sx, 0, 0, 0.12, 0.02, "Brass", n=8)
     b.box(-0.68, 0.68, 0.12, 0.16, 0.85, 1.62, "Screen")
     b.box(-0.69, 0.69, 0.16, 0.18, 0.84, 1.63, "PlasticDark")
-    b.cyl(w / 2 - 0.2, 0, 0.5, 0.75, 0.08, "PotWhite")
-    b.sph(w / 2 - 0.2, 0, 0.88, 0.16, "Leaf", sz=1.2)
+    b.cyl(w / 2 - 0.2, 0, 0.5, 0.72, 0.075, "Ceramic", r_top=0.09, n=24)
+    sprigs(b, w / 2 - 0.2, 0, 0.7, 0.4, 7, "LeafBroad")
 
 
 def chair(b, x, y, rz):
     with b.push(x, y, rz):
-        b.box(-0.22, 0.22, -0.22, 0.22, 0.43, 0.47, "Oak")
-        b.box(-0.2, 0.2, -0.2, 0.2, 0.47, 0.5, "Upholstery")
         for sx in (-0.19, 0.19):
             for sy in (-0.19, 0.19):
-                b.cyl(sx, sy, 0, 0.43, 0.017, "Walnut", n=8)
-        b.boxr((0, 0.2, 0.68), (0.42, 0.03, 0.3), "Oak", rot=(-6, 0, 0))
+                b.cyl(sx, sy, 0, 0.44, 0.014, "Oak", r_top=0.02, n=10)
+        b.rbox((0, 0, 0.45), (0.46, 0.45, 0.035), "Oak", e=0.2)
+        b.rbox((0, -0.01, 0.49), (0.42, 0.4, 0.06), "Upholstery", e=0.3, puff=0.3)
         for sx in (-0.19, 0.19):
-            b.box(sx - 0.015, sx + 0.015, 0.185, 0.215, 0.47, 0.82, "Walnut")
+            b.tube((sx, 0.2, 0.45), (sx, 0.23, 0.84), 0.014, 0.012, "Oak")
+        b.rbox((0, 0.225, 0.74), (0.44, 0.025, 0.17), "Oak", rot=(-8, 0, 0), e=0.25)
 
 
 def dining(b, w=1.6, d=0.9, chairs=6, pendant=True):
@@ -739,8 +860,8 @@ def dining(b, w=1.6, d=0.9, chairs=6, pendant=True):
         x = -w / 2 + w * (i + 0.5) / per
         chair(b, x, -d / 2 - 0.12, 180)
         chair(b, x, d / 2 + 0.12, 0)
-    b.cyl(0.1, 0.05, 0.76, 0.98, 0.07, "PotWhite", r_top=0.05)
-    b.sph(0.1, 0.05, 1.05, 0.1, "LeafLight", sz=0.8)
+    b.cyl(0.1, 0.05, 0.76, 0.95, 0.06, "Ceramic", r_top=0.045, n=24)
+    sprigs(b, 0.1, 0.05, 0.93, 0.26, 6, "LeafOlive", tilt=(5, 35))
     b.box(-0.45, -0.1, -0.12, 0.15, 0.76, 0.765, "Linen")
     if pendant:
         for px in ((-w / 4, w / 4) if w > 1.3 else (0,)):
@@ -804,8 +925,8 @@ def kitchen_run(b, L, fridge=True, sink=None, hob=None, upper=True, window=None)
                 a = s0 + i * pw
                 b.box(a + 0.003, a + pw - 0.003, -0.06, -0.04, 1.553, 2.247, "Cabinet")
     # a few things on the counter
-    b.cyl(L / 2 - 0.25, 0.1, 0.9, 1.15, 0.06, "PotWhite")
-    b.sph(L / 2 - 0.25, 0.1, 1.25, 0.11, "LeafLight", sz=1.1)
+    b.cyl(L / 2 - 0.25, 0.1, 0.9, 1.04, 0.07, "Pot", r_top=0.08, n=24)
+    sprigs(b, L / 2 - 0.25, 0.1, 1.02, 0.28, 7, "LeafBroad")
     b.box(L / 2 - 0.65, L / 2 - 0.4, 0.15, 0.26, 0.9, 1.25, "Walnut")
 
 
@@ -918,64 +1039,116 @@ def dumbbell_rack(b, w=1.2):
             b.cyl(-0.0, z + r + 0.02, x - 0.07, x + 0.07, 0.015, "Chrome", axis="x", n=8)
 
 
-def plant(b, h=1.2, r=0.18, pot="Pot", leaf="Leaf"):
-    b.cyl(0, 0, 0, r * 2.1, r, pot, r_top=r * 1.15)
-    b.cyl(0, 0, r * 2.05, r * 2.1, r * 1.05, "Soil")
-    b.cyl(0, 0, r * 2, h * 0.65, 0.02, "Bark", n=6)
-    rnd = __import__("random").Random(int(h * 1000) + int(r * 100))
-    for i in range(22):
-        a = rnd.uniform(0, 6.283)
-        d = rnd.uniform(0.0, 0.22) * h / 1.2
-        z = h * rnd.uniform(0.5, 0.95)
-        b.sph(math.cos(a) * d, math.sin(a) * d, z, h * rnd.uniform(0.07, 0.12),
-              leaf if rnd.random() < 0.6 else "LeafLight", sx=1.0, sy=rnd.uniform(0.6, 1), sz=rnd.uniform(0.4, 0.7), n=10)
+def sprigs(b, x, y, z, size, n, mat, seed=None, tilt=(15, 55)):
+    rnd = __import__("random").Random(seed if seed is not None else int((x * 31 + y * 17 + z * 7) * 1000))
+    for i in range(n):
+        az = 360 * i / n + rnd.uniform(-20, 20)
+        tl = rnd.uniform(*tilt)
+        s = size * rnd.uniform(0.75, 1.15)
+        b.card((x, y, z), s * 0.8, s, mat, rot=(tl, 0, az + 90))
 
 
-def olive_tree(b, h=2.8):
-    b.cyl(0, 0, 0, 0.5, 0.35, "Stone", r_top=0.38)
-    b.cyl(0, 0, 0.48, 0.5, 0.33, "Soil")
-    b.cyl(0, 0, 0.5, h * 0.6, 0.06, "Bark", r_top=0.04, n=8)
-    rnd = __import__("random").Random(int(h * 100))
-    for k in range(3):  # a few branches
-        a = k * 2.1 + 0.4
-        b.cyl(math.cos(a) * 0.18, math.sin(a) * 0.18, h * 0.5, h * 0.72, 0.03, "Bark", r_top=0.015, n=6)
-    for i in range(46):
-        a = rnd.uniform(0, 6.283)
-        d = rnd.uniform(0.0, 0.75)
-        z = h * rnd.uniform(0.6, 0.95)
-        b.sph(math.cos(a) * d, math.sin(a) * d, z, rnd.uniform(0.13, 0.22),
-              "LeafLight" if rnd.random() < 0.55 else "Leaf", sy=rnd.uniform(0.6, 1), sz=rnd.uniform(0.45, 0.7), n=10)
+def plant(b, h=1.2, r=0.18, pot="Pot", leaf=None, seed=None):
+    """Potted houseplant: tapered pot, stems and broad leaf sprigs."""
+    rnd = __import__("random").Random(seed if seed is not None else int(h * 1000 + r * 100))
+    ph = r * 2.0
+    b.cyl(0, 0, 0, ph, r * 0.82, pot, r_top=r, n=32)
+    b.cyl(0, 0, ph - 0.03, ph, r * 1.04, pot, n=32)
+    b.cyl(0, 0, ph - 0.035, ph - 0.03, r * 0.97, "Soil", n=24)
+    n = max(7, int(h * 11))
+    for i in range(n):
+        az = rnd.uniform(0, 2 * math.pi)
+        tilt = rnd.uniform(0.05, 0.55)
+        L = (h - ph) * rnd.uniform(0.45, 0.95)
+        p0 = Vector((math.cos(az) * 0.03, math.sin(az) * 0.03, ph - 0.03))
+        d = Vector((math.cos(az) * math.sin(tilt), math.sin(az) * math.sin(tilt), math.cos(tilt)))
+        p1 = p0 + d * L
+        b.tube(p0, p1, 0.009, 0.006, "Bark", n=6)
+        s = rnd.uniform(0.32, 0.46) * max(0.7, h / 1.4)
+        b.card(tuple(p1 - d * 0.05), s * 0.85, s, "LeafBroad",
+               rot=(math.degrees(tilt) + rnd.uniform(10, 35), 0, math.degrees(az) + 90))
+        if rnd.random() < 0.5:
+            b.card(tuple(p0 + d * L * 0.6), s * 0.7, s * 0.8, "LeafBroad",
+                   rot=(math.degrees(tilt) + rnd.uniform(25, 50), 0, math.degrees(az) + 90 + rnd.uniform(-40, 40)))
+
+
+def olive_tree(b, h=2.8, seed=None, planter=True):
+    """Olive tree: gnarled trunk, forking limbs, clusters of silver-green leaf sprigs."""
+    rnd = __import__("random").Random(seed if seed is not None else int(h * 997))
+    z0 = 0.0
+    if planter:
+        b.cyl(0, 0, 0, 0.5, 0.33, "Stone", r_top=0.38, n=32)
+        b.cyl(0, 0, 0.47, 0.5, 0.35, "Soil", n=24)
+        z0 = 0.47
+    tips = []
+
+    def limb(p, d, L, r, depth):
+        segs = 3
+        for i in range(segs):
+            d = (d + Vector((rnd.uniform(-.25, .25), rnd.uniform(-.25, .25), rnd.uniform(-.05, .15)))).normalized()
+            q = p + d * (L / segs)
+            r1 = r * (1 - 0.18 * (i + 1) / segs)
+            b.tube(p, q, r, r1, "Bark", n=7)
+            p, r = q, r1
+            if depth <= 1:
+                tips.append((p.copy(), d.copy(), 0.6))
+        if depth == 0:
+            tips.append((p.copy(), d.copy(), 1.0))
+            return
+        for k in range(rnd.choice((2, 3))):
+            az = rnd.uniform(0, 2 * math.pi)
+            spread = rnd.uniform(0.45, 0.8)
+            nd = (d * math.cos(spread) + Vector((math.cos(az), math.sin(az), 0)) * math.sin(spread)).normalized()
+            limb(p, nd, L * rnd.uniform(0.6, 0.78), r * 0.62, depth - 1)
+
+    trunk_h = h * 0.42
+    p = Vector((0, 0, z0))
+    r = 0.075 * h / 2.8
+    for i in range(4):
+        q = p + Vector((rnd.uniform(-.06, .06), rnd.uniform(-.06, .06), (trunk_h - z0) / 4))
+        b.tube(p, q, r, r * 0.9, "Bark", n=9)
+        p, r = q, r * 0.9
+    for k in range(4):
+        az = k * math.pi / 2 + rnd.uniform(-.4, .4)
+        d = Vector((math.cos(az) * 0.55, math.sin(az) * 0.55, 0.85)).normalized()
+        limb(p, d, h * 0.3, r * 0.7, 2)
+    for (tp, td, w) in tips:
+        for j in range(int(11 * w) + 3):
+            az = rnd.uniform(0, 360)
+            b.card(tuple(tp + Vector((rnd.uniform(-.14, .14), rnd.uniform(-.14, .14), rnd.uniform(-.1, .08)))),
+                   0.36, 0.5, "LeafOlive", rot=(rnd.uniform(20, 120), 0, az))
 
 
 def lounger(b):
-    b.box(-0.33, 0.33, -0.9, 0.6, 0.18, 0.3, "Wicker")
-    b.box(-0.3, 0.3, -0.88, 0.58, 0.3, 0.36, "Cushion")
-    b.boxr((0, 0.85, 0.58), (0.66, 0.08, 0.7), "Wicker", rot=(-50, 0, 0))
-    b.boxr((0, 0.78, 0.6), (0.6, 0.05, 0.64), "Cushion", rot=(-50, 0, 0))
+    b.rbox((0, -0.15, 0.24), (0.66, 1.5, 0.1), "Wicker", e=0.2)
+    b.rbox((0, -0.17, 0.33), (0.6, 1.42, 0.1), "Cushion", e=0.3, puff=0.3)
+    b.rbox((0, 0.78, 0.58), (0.66, 0.08, 0.72), "Wicker", rot=(-50, 0, 0), e=0.2)
+    b.rbox((0, 0.7, 0.62), (0.6, 0.09, 0.66), "Cushion", rot=(-50, 0, 0), e=0.3)
+    b.rbox((0, 0.55, 0.82), (0.4, 0.3, 0.12), "Accent", rot=(-48, 0, 0), e=0.55, puff=0.8)
     for sx in (-0.28, 0.28):
-        for sy in (-0.85, 0.85):
-            b.box(sx - 0.03, sx + 0.03, sy - 0.03, sy + 0.03, 0, 0.18, "Wicker")
+        for sy in (-0.82, 0.5):
+            b.cyl(sx, sy, 0, 0.2, 0.025, "Wicker", n=10)
 
 
 def outdoor_table(b, r=0.55, chairs=4, parasol=True):
-    b.cyl(0, 0, 0.72, 0.75, r, "Stone", n=32)
-    b.cyl(0, 0, 0, 0.72, 0.04, "Frame", n=10)
-    b.cyl(0, 0, 0, 0.03, 0.25, "Frame")
+    b.cyl(0, 0, 0.72, 0.75, r, "Stone", n=48)
+    b.cyl(0, 0, 0, 0.72, 0.035, "Frame", n=12)
+    b.cyl(0, 0, 0, 0.03, 0.25, "Frame", n=24)
     for i in range(chairs):
         a = 360 * i / chairs
         x = math.sin(math.radians(a)) * (r + 0.25)
         y = -math.cos(math.radians(a)) * (r + 0.25)
         with b.push(x, y, a + 180):
-            b.box(-0.24, 0.24, -0.22, 0.22, 0.4, 0.45, "Wicker")
-            b.box(-0.22, 0.22, -0.2, 0.2, 0.45, 0.5, "Cushion")
-            b.boxr((0, 0.21, 0.68), (0.48, 0.05, 0.4), "Wicker", rot=(-8, 0, 0))
+            b.rbox((0, 0, 0.42), (0.48, 0.45, 0.05), "Wicker", e=0.25)
+            b.rbox((0, -0.01, 0.48), (0.44, 0.41, 0.08), "Cushion", e=0.3, puff=0.35)
+            b.rbox((0, 0.21, 0.68), (0.48, 0.05, 0.4), "Wicker", rot=(-8, 0, 0), e=0.25)
             for sx in (-0.2, 0.2):
                 for sy in (-0.18, 0.18):
-                    b.cyl(sx, sy, 0, 0.4, 0.015, "Frame", n=6)
+                    b.cyl(sx, sy, 0, 0.42, 0.014, "Frame", n=8)
     if parasol:
-        b.cyl(0, 0, 0.75, 2.4, 0.02, "Walnut", n=8)
-        b.cyl(0, 0, 2.05, 2.45, 1.3, "Canvas", r_top=0.03, n=16, caps=False)
-        b.cyl(0, 0, 2.03, 2.05, 1.3, "Canvas", n=16)
+        b.cyl(0, 0, 0.75, 2.4, 0.02, "Walnut", n=10)
+        b.cyl(0, 0, 2.05, 2.45, 1.3, "Canvas", r_top=0.03, n=24, caps=False)
+        b.cyl(0, 0, 2.03, 2.05, 1.3, "Canvas", n=24)
 
 
 def bbq(b):
@@ -999,9 +1172,8 @@ def stairs(b, steps=6, w=0.7, run=0.24, rise=0.18, back_steps=6):
 
 
 def rug(b, w, d, mat="Rug"):
-    b.box(-w / 2, w / 2, -d / 2, d / 2, 0.0, 0.012, mat)
-    b.box(-w / 2 + 0.08, w / 2 - 0.08, -d / 2 + 0.08, d / 2 - 0.08, 0.012, 0.014,
-          "RugBlue" if mat == "Rug" else "Rug")
+    b.rbox((0, 0, 0.007), (w, d, 0.014), mat, e=0.12, n=20)
+    b.rbox((0, 0, 0.012), (w - 0.16, d - 0.16, 0.006), "RugBlue" if mat == "Rug" else "Rug", e=0.08, n=20)
 
 
 def art(b, w=0.8, h=0.6, z=1.5, mat="Art1"):
@@ -1026,8 +1198,8 @@ def console(b, w=1.0):
     b.box(-w / 2, w / 2, -0.15, 0.15, 0.78, 0.82, "Walnut")
     for sx in (-w / 2 + 0.03, w / 2 - 0.03):
         b.box(sx - 0.015, sx + 0.015, -0.13, 0.13, 0, 0.78, "Brass")
-    b.cyl(-0.3, 0, 0.82, 1.1, 0.07, "PotWhite", r_top=0.05)
-    b.sph(-0.3, 0, 1.2, 0.12, "LeafLight", sz=1.3)
+    b.cyl(-0.3, 0, 0.82, 1.08, 0.06, "Ceramic", r_top=0.045, n=24)
+    sprigs(b, -0.3, 0, 1.06, 0.38, 6, "LeafOlive", tilt=(5, 30))
     b.box(0.05, 0.35, -0.08, 0.08, 0.82, 0.86, "Book3")
 
 
@@ -1042,9 +1214,9 @@ def doormat(b):
 def front_steps(b):
     # limestone threshold and a pair of potted plants either side of the door
     b.box(0.0, 0.9, -0.6, 0.6, -0.01, 0.03, "Stone")
-    for sy in (-0.85, 0.85):
-        b.cyl(0.55, sy, 0, 0.55, 0.2, "Pot", r_top=0.24)
-        b.sph(0.55, sy, 0.8, 0.3, "Leaf", sz=1.15)
+    for k, sy in enumerate((-0.85, 0.85)):
+        with b.push(0.55, sy):
+            plant(b, h=1.1, r=0.2, pot="Pot", seed=40 + k)
 
 
 def wall_mirror(b, w=1.2, h=1.8):
@@ -1059,14 +1231,41 @@ def yoga_mat(b):
 def planter_box(b, w=1.2, d=0.4):
     b.box(-w / 2, w / 2, -d / 2, d / 2, 0, 0.45, "Stone")
     b.box(-w / 2 + 0.04, w / 2 - 0.04, -d / 2 + 0.04, d / 2 - 0.04, 0.44, 0.45, "Soil")
-    for i in range(4):
-        x = -w / 2 + 0.15 + i * (w - 0.3) / 3
-        b.sph(x, 0, 0.6, 0.18, "Leaf" if i % 2 else "LeafLight", sz=1.2)
+    k = max(2, int(w / 0.3))
+    for i in range(k):
+        x = -w / 2 + (i + 0.5) * w / k
+        sprigs(b, x, 0, 0.42, 0.42, 6, "LeafBroad", seed=i + int(w * 10))
+
+
+def curtains(b, width, h=2.55):
+    """Pair of gathered linen curtains on a rod; window along local x, wall at +y."""
+    pw = max(0.45, width * 0.36)
+    b.cyl(-0.08, 2.6, -width / 2 - 0.3, width / 2 + 0.3, 0.012, "Brass", axis="x", n=10)
+    for s in (-1, 1):
+        cx = s * (width / 2 + 0.15 - pw / 2)
+        nx, nz = 26, 6
+        A, lam = 0.045, pw / 4.5
+        verts, faces, uvs = [], [], []
+        for k in range(nz + 1):
+            z = 0.02 + (h - 0.02) * k / nz
+            for i in range(nx + 1):
+                x = cx - pw / 2 + pw * i / nx
+                yv = -0.08 + A * math.sin(2 * math.pi * (x - cx) / lam) * (0.8 + 0.2 * k / nz)
+                verts.append((x, yv, z))
+        for k in range(nz):
+            for i in range(nx):
+                a = k * (nx + 1) + i
+                faces.append((a, a + 1, a + nx + 2, a + nx + 1))
+                uvs.append([(i / nx * pw * 1.5 / FABRIC_NORMAL_TILE, k / nz * h / FABRIC_NORMAL_TILE),
+                            ((i + 1) / nx * pw * 1.5 / FABRIC_NORMAL_TILE, k / nz * h / FABRIC_NORMAL_TILE),
+                            ((i + 1) / nx * pw * 1.5 / FABRIC_NORMAL_TILE, (k + 1) / nz * h / FABRIC_NORMAL_TILE),
+                            (i / nx * pw * 1.5 / FABRIC_NORMAL_TILE, (k + 1) / nz * h / FABRIC_NORMAL_TILE)])
+        b._add(verts, faces, uvs, "Curtain", smooth=True)
 
 
 def towel_rail(b):
     b.box(-0.25, 0.25, -0.04, 0.0, 0.9, 1.6, "Chrome")
-    b.box(-0.22, 0.22, -0.07, -0.04, 1.05, 1.45, "Linen")
+    b.rbox((0, -0.07, 1.25), (0.44, 0.05, 0.42), "Linen", e=0.35)
 
 
 # Furniture placements: (id, builder, kwargs, plan X m, plan Y m (Blender), rot deg, room)
@@ -1120,7 +1319,8 @@ def place_furniture():
     # Kitchen / living A  X 8.3..13.75 / Y 0.12..2.62
     add("kitA_run", kitchen_run, 10.3, 2.17, 0, "kitA", L=2.6, fridge=True, sink=0.5, hob=-0.25)
     add("kitA_dining", dining, 10.0, 0.95, 0, "kitA", w=1.2, d=0.8, chairs=4)
-    add("kitA_sofa", sofa, 12.6, 0.65, 180, "kitA", w=2.0, d=0.9)
+    add("kitA_sofa", sofa, 12.5, 0.65, 180, "kitA", w=1.8, d=0.9)
+    add("kitA_curtains", curtains, 13.6, 1.33, -90, "kitA", bevel=0, width=1.67)
     add("kitA_tv", tv_unit, 12.7, 2.25, 0, "kitA", w=1.4)
     add("kitA_coffee", coffee_table, 12.6, 1.45, 0, "kitA", w=0.9, d=0.5)
     add("kitA_rug", rug, 12.6, 1.35, 0, "kitA", bevel=0, w=2.2, d=1.5)
@@ -1131,6 +1331,7 @@ def place_furniture():
     add("bed1_ns2", nightstand, -4.28, -2.62, 180, "bed1")
     add("bed1_wardrobe", wardrobe, -5.81, 0.37, 0, "bed1", w=1.75)
     add("bed1_desk", desk, -3.75, -1.6, -90, "bed1")
+    add("bed1_curtains", curtains, -6.62, -1.42, 90, "bed1", bevel=0, width=1.67)
     add("bed1_rug", rug, -5.3, -1.6, 0, "bed1", bevel=0, w=2.2, d=1.6, mat="RugBlue")
 
     # Bathroom 2  X -3.38..-1.33 / Y -3.25..-0.85
@@ -1144,7 +1345,8 @@ def place_furniture():
     add("bed2_ns1", nightstand, -1.05, -1.5, 90, "bed2")
     add("bed2_ns2", nightstand, -1.05, -3.6, 90, "bed2")
     add("bed2_wardrobe", wardrobe, 0.35, -1.21, 0, "bed2", w=2.1)
-    add("bed2_chair", sofa, 2.05, -3.3, -90, "bed2", w=0.9, d=0.8, mat="Upholstery")
+    add("bed2_chair", sofa, 1.92, -3.3, -90, "bed2", w=0.95, d=0.82, mat="Upholstery")
+    add("bed2_curtains", curtains, 2.48, -3.29, -90, "bed2", bevel=0, width=0.92)
     add("bed2_rug", rug, 0.45, -2.55, 90, "bed2", bevel=0, w=2.3, d=1.7)
     add("bed2_art", art, -1.25, -2.55, 90, "bed2", w=1.1, h=0.7, z=1.7, mat="Art1")
 
@@ -1160,7 +1362,8 @@ def place_furniture():
     # Kitchen / living / dining B  X 7.05..13.75 / Y -4.0..-1.02
     add("kitB_run", kitchen_run, 8.65, -3.53, 180, "kitB", L=2.9, fridge=True, sink=-0.4, hob=0.55)
     add("kitB_dining", dining, 10.75, -1.95, 0, "kitB", w=1.4, d=0.85, chairs=4)
-    add("kitB_sofa", sofa, 12.4, -3.37, 180, "kitB", w=2.2)
+    add("kitB_sofa", sofa, 12.3, -3.37, 180, "kitB", w=2.0)
+    add("kitB_curtains", curtains, 13.6, -2.5, -90, "kitB", bevel=0, width=2.17)
     add("kitB_coffee", coffee_table, 12.4, -2.55, 0, "kitB", w=1.0, d=0.5)
     add("kitB_tv", tv_unit, 12.45, -1.3, 0, "kitB", w=1.6)
     add("kitB_rug", rug, 12.4, -2.6, 0, "kitB", bevel=0, w=2.4, d=1.6)
@@ -1346,7 +1549,7 @@ def main():
     kw = dict(filepath=glb, export_format="GLB", use_selection=True, export_apply=True,
               export_yup=True, export_lights=False, export_cameras=False)
     try:
-        bpy.ops.export_scene.gltf(export_image_format="JPEG", export_jpeg_quality=86, **kw)
+        bpy.ops.export_scene.gltf(export_image_format="AUTO", export_jpeg_quality=86, **kw)
     except TypeError:
         bpy.ops.export_scene.gltf(**kw)
 

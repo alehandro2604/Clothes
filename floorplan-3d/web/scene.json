@@ -760,6 +760,10 @@
    "room": "kitA"
   },
   {
+   "name": "furn_kitA_curtains",
+   "room": "kitA"
+  },
+  {
    "name": "furn_kitA_tv",
    "room": "kitA"
   },
@@ -789,6 +793,10 @@
   },
   {
    "name": "furn_bed1_desk",
+   "room": "bed1"
+  },
+  {
+   "name": "furn_bed1_curtains",
    "room": "bed1"
   },
   {
@@ -829,6 +837,10 @@
   },
   {
    "name": "furn_bed2_chair",
+   "room": "bed2"
+  },
+  {
+   "name": "furn_bed2_curtains",
    "room": "bed2"
   },
   {
@@ -877,6 +889,10 @@
   },
   {
    "name": "furn_kitB_sofa",
+   "room": "kitB"
+  },
+  {
+   "name": "furn_kitB_curtains",
    "room": "kitB"
   },
   {
@@ -1524,6 +1540,8 @@
   "concrete": 2.0,
   "limestone": 3.0,
   "terracotta": 1.2,
-  "pebble": 1.0
+  "pebble": 1.0,
+  "woodlight": 1.0,
+  "wooddark": 1.0
  }
 }

@@ -499,6 +499,9 @@ root.traverse((o) => {
 });
 for (const m of allMats.values()) {
   if (!m.isMeshStandardMaterial) continue;
+  if (m.name.startsWith('Leaf')) { m.alphaTest = .5; m.transparent = false; m.side = THREE.DoubleSide; }
+  // only foliage and curtains need both faces; everything else is closed geometry
+  else if (m.name !== 'Curtain') m.side = THREE.FrontSide;
   m.envMapIntensity = m.metalness > .5 ? 1.0 : .45;
   if (m.name === 'Glass' || m.name === 'Bulb' || m.name.startsWith('Floor_') || m.name === 'Ceiling') continue;
   if (['Ground', 'Asphalt', 'Pavement'].includes(m.name)) continue;
@@ -591,7 +594,8 @@ function applyColor(t, force) {
   if (!force && Math.abs(t - lastColorT) < 1e-3) return;
   lastColorT = t;
   for (const m of matsColor) {
-    const wantMap = t > .02 ? targetMap(m) : null;
+    // cut-out leaves keep their texture in the clay stage (otherwise they'd show as square cards)
+    const wantMap = t > .02 || m.alphaTest > 0 ? targetMap(m) : null;
     if (m.map !== wantMap) { m.map = wantMap; m.needsUpdate = true; }
     m.color.copy(CLAY).lerp(targetColor(m), t);
   }

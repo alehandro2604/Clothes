@@ -26,7 +26,10 @@ TILE_METERS = {
     "limestone": 3.0,
     "terracotta": 1.2,
     "pebble": 1.0,
+    "woodlight": 1.0,
+    "wooddark": 1.0,
 }
+FABRIC_NORMAL_TILE = 0.12  # metres per repeat of fabric_n.png
 
 
 def hexrgb(h):
@@ -290,6 +293,92 @@ def pebble(rng):
     return np.asarray(im, np.float32)
 
 
+# ------------------------------------------------- continuous wood grain
+def woodgrain(rng, base, dark):
+    S = SIZE
+    yy, xx = np.mgrid[0:S, 0:S].astype(np.float32)
+    n = fbm(rng, 3, 5)
+    n2 = fbm(rng, 16, 3)
+    # growth rings: stretched along x, wobbling with noise; x-periodic so it tiles
+    rings = np.sin(2 * np.pi * (yy / S * 16 + 0.55 * n + 0.04 * np.sin(2 * np.pi * xx / S * 2)))
+    rings = (0.5 + 0.5 * rings) ** 7
+    fine = (0.5 + 0.5 * np.sin(2 * np.pi * (yy / S * 70 + 4 * n2))) ** 4
+    base, dark = hexrgb(base), hexrgb(dark)
+    t = np.clip(0.4 * rings + 0.22 * fine + 0.2 * (n - 0.5), 0, 1)[..., None]
+    return base * (1 - t) + dark * t
+
+
+# ------------------------------------------------- fabric weave normal map
+def fabric_normal(rng):
+    S = 512
+    yy, xx = np.mgrid[0:S, 0:S].astype(np.float32)
+    k = 2 * np.pi * 48 / S  # 48 threads per repeat
+    warp = np.abs(np.sin(xx * k / 2))
+    weft = np.abs(np.sin(yy * k / 2))
+    over = (np.floor(xx * 48 / S) + np.floor(yy * 48 / S)) % 2
+    h = np.where(over > 0, warp * 0.6 + weft * 0.4, weft * 0.6 + warp * 0.4)
+    h += 0.35 * tnoise(rng, 24, S) + 0.15 * tnoise(rng, 96, S)
+    gx = (np.roll(h, -1, 1) - np.roll(h, 1, 1)) * 1.6
+    gy = (np.roll(h, -1, 0) - np.roll(h, 1, 0)) * 1.6
+    nz = np.ones_like(h)
+    L = np.sqrt(gx * gx + gy * gy + nz)
+    nrm = np.stack([-gx / L, gy / L, nz / L], -1)
+    return (nrm * 0.5 + 0.5) * 255
+
+
+# ------------------------------------------------- leaf sprigs (RGBA)
+def _leaf(d, cx, cy, ang, length, width, col, vein):
+    pts = []
+    for i in range(21):
+        t = i / 20
+        w = width * math.sin(math.pi * t) ** 0.8 * (1 - 0.25 * t)
+        pts.append((t * length, w))
+    pts += [(x, -y) for x, y in reversed(pts)]
+    ca, sa = math.cos(ang), math.sin(ang)
+    poly = [(cx + x * ca - y * sa, cy + x * sa + y * ca) for x, y in pts]
+    d.polygon(poly, fill=col)
+    d.line([(cx, cy), (cx + length * 0.92 * ca, cy + length * 0.92 * sa)], fill=vein, width=2)
+
+
+def sprig(rng, kind):
+    S = 1024
+    im = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    if kind == "olive":
+        stem = [(S * 0.5, S * 0.98)]
+        x, y = S * 0.5, S * 0.98
+        for i in range(10):
+            x += rng.uniform(-18, 18)
+            y -= S * 0.088
+            stem.append((x, y))
+        d.line(stem, fill=(92, 78, 60, 255), width=7)
+        for i, (sx, sy) in enumerate(stem[1:]):
+            for side in (-1, 1):
+                ang = -math.pi / 2 + side * rng.uniform(0.5, 1.1)
+                g = rng.uniform(0.85, 1.1)
+                top = rng.random() < 0.5
+                col = (int(118 * g), int(134 * g), int(94 * g), 255) if top else (int(160 * g), int(170 * g), int(140 * g), 255)
+                _leaf(d, sx, sy, ang, rng.uniform(150, 210) * (1 - i * 0.03), rng.uniform(17, 24), col,
+                      (int(175 * g), int(182 * g), int(150 * g), 255))
+        _leaf(d, stem[-1][0], stem[-1][1], -math.pi / 2, 160, 18, (120, 136, 96, 255), (170, 178, 146, 255))
+    else:  # broad leaves for houseplants and shrubs
+        for i in range(9):
+            ang = -math.pi / 2 + rng.uniform(-1.25, 1.25)
+            cx, cy = S * 0.5 + rng.uniform(-60, 60), S * 0.96
+            L = rng.uniform(420, 600)
+            ex, ey = cx + math.cos(ang) * L * 0.35, cy + math.sin(ang) * L * 0.35
+            d.line([(cx, cy), (ex, ey)], fill=(74, 96, 52, 255), width=8)
+            g = rng.uniform(0.8, 1.15)
+            col = (int(52 * g), int(98 * g), int(48 * g), 255)
+            _leaf(d, ex, ey, ang + rng.uniform(-0.3, 0.3), L * 0.68, L * 0.2, col, (int(110 * g), int(150 * g), int(90 * g), 255))
+    # soft shading & slight blur for antialiasing
+    a = np.asarray(im, np.float32)
+    n = tnoise(rng, 32, S)
+    a[..., :3] *= (0.85 + 0.3 * n)[..., None]
+    im = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA").resize((512, 512), Image.LANCZOS)
+    return im
+
+
 def main(out):
     os.makedirs(out, exist_ok=True)
     rng = np.random.default_rng(7)
@@ -307,9 +396,15 @@ def main(out):
         "terracotta": lambda: terracotta(rng),
         "pebble": lambda: pebble(rng),
     }
+    jobs["woodlight"] = lambda: woodgrain(rng, "#C9A273", "#9C7448")
+    jobs["wooddark"] = lambda: woodgrain(rng, "#6A4A33", "#3E2A1D")
     for name, fn in jobs.items():
         save(fn(), os.path.join(out, f"{name}.jpg"))
         print("wrote", name)
+    save(fabric_normal(rng), os.path.join(out, "fabric_n.png"))
+    sprig(rng, "olive").save(os.path.join(out, "leaf_olive.png"), optimize=True)
+    sprig(rng, "broad").save(os.path.join(out, "leaf_broad.png"), optimize=True)
+    print("wrote fabric_n, leaf_olive, leaf_broad")
 
 
 if __name__ == "__main__":
