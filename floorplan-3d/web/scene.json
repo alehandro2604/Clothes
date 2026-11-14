@@ -1,0 +1,1529 @@
+{
+ "ceiling": 2.8,
+ "rooms": [
+  {
+   "id": "gym",
+   "name": "Gym",
+   "indoor": true,
+   "finish": "concrete",
+   "tile": 2.0,
+   "area": 13.0,
+   "c": [
+    -7.225,
+    -2.188
+   ],
+   "label": true,
+   "poly": [
+    [
+     -9.417,
+     -3.9
+    ],
+    [
+     -4.883,
+     -3.333
+    ],
+    [
+     -4.883,
+     -0.75
+    ],
+    [
+     -9.417,
+     -0.75
+    ]
+   ]
+  },
+  {
+   "id": "utility",
+   "name": "Utility",
+   "indoor": true,
+   "finish": "porcelain",
+   "tile": 1.2,
+   "area": 7.2,
+   "c": [
+    -2.464,
+    -2.433
+   ],
+   "label": true,
+   "poly": [
+    [
+     -4.883,
+     -3.333
+    ],
+    [
+     0.183,
+     -2.95
+    ],
+    [
+     0.183,
+     -1.717
+    ],
+    [
+     -4.883,
+     -1.717
+    ]
+   ]
+  },
+  {
+   "id": "hall",
+   "name": "Hallway",
+   "indoor": true,
+   "finish": "maltese",
+   "tile": 0.8,
+   "area": 8.7,
+   "c": [
+    4.129,
+    -2.121
+   ],
+   "label": true,
+   "poly": [
+    [
+     0.183,
+     -2.95
+    ],
+    [
+     1.083,
+     -2.883
+    ],
+    [
+     1.083,
+     -2.617
+    ],
+    [
+     8.3,
+     -2.617
+    ],
+    [
+     8.3,
+     -1.583
+    ],
+    [
+     0.183,
+     -1.583
+    ]
+   ]
+  },
+  {
+   "id": "entry",
+   "name": "Apartment entrance",
+   "indoor": true,
+   "finish": "maltese",
+   "tile": 0.8,
+   "area": 1.3,
+   "c": [
+    4.558,
+    -0.85
+   ],
+   "label": false,
+   "poly": [
+    [
+     4.117,
+     -1.583
+    ],
+    [
+     5.0,
+     -1.583
+    ],
+    [
+     5.0,
+     -0.117
+    ],
+    [
+     4.117,
+     -0.117
+    ]
+   ]
+  },
+  {
+   "id": "stairs",
+   "name": "Stairs",
+   "indoor": true,
+   "finish": "maltese",
+   "tile": 0.8,
+   "area": 2.2,
+   "c": [
+    5.733,
+    -0.85
+   ],
+   "label": true,
+   "poly": [
+    [
+     5.0,
+     -1.583
+    ],
+    [
+     6.467,
+     -1.583
+    ],
+    [
+     6.467,
+     -0.117
+    ],
+    [
+     5.0,
+     -0.117
+    ]
+   ]
+  },
+  {
+   "id": "ens",
+   "name": "Ensuite",
+   "indoor": true,
+   "finish": "marble",
+   "tile": 2.0,
+   "area": 4.9,
+   "c": [
+    -3.367,
+    -0.917
+   ],
+   "label": true,
+   "poly": [
+    [
+     -4.883,
+     -1.717
+    ],
+    [
+     -1.85,
+     -1.717
+    ],
+    [
+     -1.85,
+     -0.117
+    ],
+    [
+     -4.883,
+     -0.117
+    ]
+   ]
+  },
+  {
+   "id": "bath1",
+   "name": "Bathroom",
+   "indoor": true,
+   "finish": "porcelain",
+   "tile": 1.2,
+   "area": 3.3,
+   "c": [
+    -0.833,
+    -0.917
+   ],
+   "label": true,
+   "poly": [
+    [
+     -1.85,
+     -1.717
+    ],
+    [
+     0.183,
+     -1.717
+    ],
+    [
+     0.183,
+     -0.117
+    ],
+    [
+     -1.85,
+     -0.117
+    ]
+   ]
+  },
+  {
+   "id": "box",
+   "name": "Box room",
+   "indoor": true,
+   "finish": "concrete",
+   "tile": 2.0,
+   "area": 3.6,
+   "c": [
+    1.417,
+    -0.85
+   ],
+   "label": true,
+   "poly": [
+    [
+     0.183,
+     -1.583
+    ],
+    [
+     2.65,
+     -1.583
+    ],
+    [
+     2.65,
+     -0.117
+    ],
+    [
+     0.183,
+     -0.117
+    ]
+   ]
+  },
+  {
+   "id": "lift",
+   "name": "Lift",
+   "indoor": true,
+   "finish": "concrete",
+   "tile": 2.0,
+   "area": 2.2,
+   "c": [
+    3.383,
+    -0.85
+   ],
+   "label": true,
+   "poly": [
+    [
+     2.65,
+     -1.583
+    ],
+    [
+     4.117,
+     -1.583
+    ],
+    [
+     4.117,
+     -0.117
+    ],
+    [
+     2.65,
+     -0.117
+    ]
+   ]
+  },
+  {
+   "id": "wc",
+   "name": "WC",
+   "indoor": true,
+   "finish": "porcelain",
+   "tile": 1.2,
+   "area": 2.7,
+   "c": [
+    7.383,
+    -0.85
+   ],
+   "label": true,
+   "poly": [
+    [
+     6.467,
+     -1.583
+    ],
+    [
+     8.3,
+     -1.583
+    ],
+    [
+     8.3,
+     -0.117
+    ],
+    [
+     6.467,
+     -0.117
+    ]
+   ]
+  },
+  {
+   "id": "kitA",
+   "name": "Kitchen / living",
+   "indoor": true,
+   "finish": "terrazzo",
+   "tile": 1.5,
+   "area": 13.6,
+   "c": [
+    11.025,
+    -1.367
+   ],
+   "label": true,
+   "poly": [
+    [
+     8.3,
+     -2.617
+    ],
+    [
+     13.75,
+     -2.617
+    ],
+    [
+     13.75,
+     -0.117
+    ],
+    [
+     8.3,
+     -0.117
+    ]
+   ]
+  },
+  {
+   "id": "bed1",
+   "name": "Bedroom 1",
+   "indoor": true,
+   "finish": "oak",
+   "tile": 2.0,
+   "area": 12.0,
+   "c": [
+    -5.129,
+    1.307
+   ],
+   "label": true,
+   "poly": [
+    [
+     -6.75,
+     -0.75
+    ],
+    [
+     -4.883,
+     -0.75
+    ],
+    [
+     -4.883,
+     -0.117
+    ],
+    [
+     -3.383,
+     -0.117
+    ],
+    [
+     -3.383,
+     3.183
+    ],
+    [
+     -6.75,
+     3.033
+    ]
+   ]
+  },
+  {
+   "id": "corr",
+   "name": "Corridor",
+   "indoor": true,
+   "finish": "maltese",
+   "tile": 0.8,
+   "area": 25.4,
+   "c": [
+    5.301,
+    0.803
+   ],
+   "label": true,
+   "poly": [
+    [
+     -3.383,
+     -0.117
+    ],
+    [
+     13.75,
+     -0.117
+    ],
+    [
+     13.75,
+     1.017
+    ],
+    [
+     7.05,
+     1.017
+    ],
+    [
+     7.05,
+     2.583
+    ],
+    [
+     2.583,
+     2.583
+    ],
+    [
+     2.583,
+     0.85
+    ],
+    [
+     -3.383,
+     0.85
+    ]
+   ]
+  },
+  {
+   "id": "bath2",
+   "name": "Bathroom 2",
+   "indoor": true,
+   "finish": "porcelain",
+   "tile": 1.2,
+   "area": 4.9,
+   "c": [
+    -2.354,
+    2.033
+   ],
+   "label": true,
+   "poly": [
+    [
+     -3.383,
+     0.85
+    ],
+    [
+     -1.333,
+     0.85
+    ],
+    [
+     -1.333,
+     3.25
+    ],
+    [
+     -3.383,
+     3.183
+    ]
+   ]
+  },
+  {
+   "id": "bed2",
+   "name": "Bedroom 2",
+   "indoor": true,
+   "finish": "oak",
+   "tile": 2.0,
+   "area": 12.3,
+   "c": [
+    0.625,
+    2.425
+   ],
+   "label": true,
+   "poly": [
+    [
+     -1.333,
+     0.85
+    ],
+    [
+     2.583,
+     0.85
+    ],
+    [
+     2.583,
+     4.0
+    ],
+    [
+     -1.333,
+     4.0
+    ]
+   ]
+  },
+  {
+   "id": "kitB",
+   "name": "Kitchen / living / dining",
+   "indoor": true,
+   "finish": "oak",
+   "tile": 2.0,
+   "area": 20.0,
+   "c": [
+    10.4,
+    2.508
+   ],
+   "label": true,
+   "poly": [
+    [
+     7.05,
+     1.017
+    ],
+    [
+     13.75,
+     1.017
+    ],
+    [
+     13.75,
+     4.0
+    ],
+    [
+     7.05,
+     4.0
+    ]
+   ]
+  },
+  {
+   "id": "court",
+   "name": "Courtyard",
+   "indoor": false,
+   "finish": "limestone",
+   "tile": 3.0,
+   "area": 6.3,
+   "c": [
+    4.817,
+    3.292
+   ],
+   "label": true,
+   "poly": [
+    [
+     2.583,
+     2.583
+    ],
+    [
+     7.05,
+     2.583
+    ],
+    [
+     7.05,
+     4.0
+    ],
+    [
+     2.583,
+     4.0
+    ]
+   ]
+  },
+  {
+   "id": "yard",
+   "name": "Garden yard",
+   "indoor": false,
+   "finish": "limestone",
+   "tile": 3.0,
+   "area": 47.3,
+   "c": [
+    -11.137,
+    0.066
+   ],
+   "label": true,
+   "poly": [
+    [
+     -14.25,
+     -4.0
+    ],
+    [
+     -9.417,
+     -3.9
+    ],
+    [
+     -9.417,
+     -0.75
+    ],
+    [
+     -6.75,
+     -0.75
+    ],
+    [
+     -6.75,
+     3.033
+    ],
+    [
+     -14.75,
+     3.5
+    ]
+   ]
+  },
+  {
+   "id": "patio",
+   "name": "Patio",
+   "indoor": false,
+   "finish": "terracotta",
+   "tile": 1.2,
+   "area": 13.3,
+   "c": [
+    -9.167,
+    0.625
+   ],
+   "label": true,
+   "poly": [
+    [
+     -11.583,
+     -0.75
+    ],
+    [
+     -6.75,
+     -0.75
+    ],
+    [
+     -6.75,
+     2.0
+    ],
+    [
+     -11.583,
+     2.0
+    ]
+   ]
+  },
+  {
+   "id": "planted",
+   "name": "Planted yard",
+   "indoor": false,
+   "finish": "pebble",
+   "tile": 1.0,
+   "area": 4.6,
+   "c": [
+    -10.208,
+    -2.45
+   ],
+   "label": false,
+   "poly": [
+    [
+     -11.0,
+     -3.9
+    ],
+    [
+     -9.417,
+     -3.9
+    ],
+    [
+     -9.417,
+     -1.0
+    ],
+    [
+     -11.0,
+     -1.0
+    ]
+   ]
+  }
+ ],
+ "furniture": [
+  {
+   "name": "furn_treadmill",
+   "room": "gym"
+  },
+  {
+   "name": "furn_bench",
+   "room": "gym"
+  },
+  {
+   "name": "furn_dumbbells",
+   "room": "gym"
+  },
+  {
+   "name": "furn_gymmirror",
+   "room": "gym"
+  },
+  {
+   "name": "furn_yogamat",
+   "room": "gym"
+  },
+  {
+   "name": "furn_gymplant",
+   "room": "gym"
+  },
+  {
+   "name": "furn_utility",
+   "room": "utility"
+  },
+  {
+   "name": "furn_utilshelf",
+   "room": "utility"
+  },
+  {
+   "name": "furn_ens_shower",
+   "room": "ens"
+  },
+  {
+   "name": "furn_ens_wc",
+   "room": "ens"
+  },
+  {
+   "name": "furn_ens_vanity",
+   "room": "ens"
+  },
+  {
+   "name": "furn_bath1_tub",
+   "room": "bath1"
+  },
+  {
+   "name": "furn_bath1_wc",
+   "room": "bath1"
+  },
+  {
+   "name": "furn_bath1_vanity",
+   "room": "bath1"
+  },
+  {
+   "name": "furn_box_shelf",
+   "room": "box"
+  },
+  {
+   "name": "furn_box_shelf2",
+   "room": "box"
+  },
+  {
+   "name": "furn_lift_car",
+   "room": "lift"
+  },
+  {
+   "name": "furn_entry_mat",
+   "room": "entry"
+  },
+  {
+   "name": "furn_stairs",
+   "room": "stairs"
+  },
+  {
+   "name": "furn_wc_wc",
+   "room": "wc"
+  },
+  {
+   "name": "furn_wc_vanity",
+   "room": "wc"
+  },
+  {
+   "name": "furn_kitA_run",
+   "room": "kitA"
+  },
+  {
+   "name": "furn_kitA_dining",
+   "room": "kitA"
+  },
+  {
+   "name": "furn_kitA_sofa",
+   "room": "kitA"
+  },
+  {
+   "name": "furn_kitA_tv",
+   "room": "kitA"
+  },
+  {
+   "name": "furn_kitA_coffee",
+   "room": "kitA"
+  },
+  {
+   "name": "furn_kitA_rug",
+   "room": "kitA"
+  },
+  {
+   "name": "furn_bed1_bed",
+   "room": "bed1"
+  },
+  {
+   "name": "furn_bed1_ns1",
+   "room": "bed1"
+  },
+  {
+   "name": "furn_bed1_ns2",
+   "room": "bed1"
+  },
+  {
+   "name": "furn_bed1_wardrobe",
+   "room": "bed1"
+  },
+  {
+   "name": "furn_bed1_desk",
+   "room": "bed1"
+  },
+  {
+   "name": "furn_bed1_rug",
+   "room": "bed1"
+  },
+  {
+   "name": "furn_bath2_shower",
+   "room": "bath2"
+  },
+  {
+   "name": "furn_bath2_wc",
+   "room": "bath2"
+  },
+  {
+   "name": "furn_bath2_vanity",
+   "room": "bath2"
+  },
+  {
+   "name": "furn_bath2_towel",
+   "room": "bath2"
+  },
+  {
+   "name": "furn_bed2_bed",
+   "room": "bed2"
+  },
+  {
+   "name": "furn_bed2_ns1",
+   "room": "bed2"
+  },
+  {
+   "name": "furn_bed2_ns2",
+   "room": "bed2"
+  },
+  {
+   "name": "furn_bed2_wardrobe",
+   "room": "bed2"
+  },
+  {
+   "name": "furn_bed2_chair",
+   "room": "bed2"
+  },
+  {
+   "name": "furn_bed2_rug",
+   "room": "bed2"
+  },
+  {
+   "name": "furn_bed2_art",
+   "room": "bed2"
+  },
+  {
+   "name": "furn_corr_console",
+   "room": "corr"
+  },
+  {
+   "name": "furn_corr_art",
+   "room": "corr"
+  },
+  {
+   "name": "furn_corr_plant",
+   "room": "corr"
+  },
+  {
+   "name": "furn_corr_rug",
+   "room": "corr"
+  },
+  {
+   "name": "furn_court_tree",
+   "room": "court"
+  },
+  {
+   "name": "furn_court_table",
+   "room": "court"
+  },
+  {
+   "name": "furn_court_planter",
+   "room": "court"
+  },
+  {
+   "name": "furn_kitB_run",
+   "room": "kitB"
+  },
+  {
+   "name": "furn_kitB_dining",
+   "room": "kitB"
+  },
+  {
+   "name": "furn_kitB_sofa",
+   "room": "kitB"
+  },
+  {
+   "name": "furn_kitB_coffee",
+   "room": "kitB"
+  },
+  {
+   "name": "furn_kitB_tv",
+   "room": "kitB"
+  },
+  {
+   "name": "furn_kitB_rug",
+   "room": "kitB"
+  },
+  {
+   "name": "furn_kitB_plant",
+   "room": "kitB"
+  },
+  {
+   "name": "furn_yard_lounger1",
+   "room": "yard"
+  },
+  {
+   "name": "furn_yard_lounger2",
+   "room": "yard"
+  },
+  {
+   "name": "furn_yard_tree",
+   "room": "yard"
+  },
+  {
+   "name": "furn_yard_bbq",
+   "room": "yard"
+  },
+  {
+   "name": "furn_yard_planter",
+   "room": "yard"
+  },
+  {
+   "name": "furn_patio_table",
+   "room": "patio"
+  },
+  {
+   "name": "furn_patio_plant1",
+   "room": "patio"
+  },
+  {
+   "name": "furn_planted_tree",
+   "room": "planted"
+  },
+  {
+   "name": "furn_planted_plant",
+   "room": "planted"
+  },
+  {
+   "name": "furn_front_steps",
+   "room": null
+  }
+ ],
+ "colliders": [
+  [
+   -9.563,
+   -3.918,
+   -4.737,
+   -3.315,
+   0.3
+  ],
+  [
+   -5.03,
+   -3.344,
+   1.23,
+   -2.872,
+   0.3
+  ],
+  [
+   1.083,
+   -3.03,
+   1.083,
+   -2.47,
+   0.3
+  ],
+  [
+   0.936,
+   -2.617,
+   13.897,
+   -2.617,
+   0.3
+  ],
+  [
+   13.75,
+   -2.764,
+   13.75,
+   -2.167,
+   0.3
+  ],
+  [
+   13.75,
+   -2.167,
+   13.75,
+   -0.5,
+   0.3
+  ],
+  [
+   13.75,
+   -0.5,
+   13.75,
+   0.033,
+   0.3
+  ],
+  [
+   13.75,
+   0.917,
+   13.75,
+   1.417,
+   0.3
+  ],
+  [
+   13.75,
+   1.417,
+   13.75,
+   3.583,
+   0.3
+  ],
+  [
+   13.75,
+   3.583,
+   13.75,
+   4.147,
+   0.3
+  ],
+  [
+   13.897,
+   4.0,
+   -1.48,
+   4.0,
+   0.3
+  ],
+  [
+   -1.333,
+   4.097,
+   -1.333,
+   3.153,
+   0.2
+  ],
+  [
+   -1.186,
+   3.255,
+   -3.53,
+   3.179,
+   0.3
+  ],
+  [
+   -3.236,
+   3.19,
+   -6.897,
+   3.027,
+   0.3
+  ],
+  [
+   -6.75,
+   3.155,
+   -6.75,
+   2.25,
+   0.25
+  ],
+  [
+   -6.75,
+   2.25,
+   -6.75,
+   0.583,
+   0.25
+  ],
+  [
+   -6.75,
+   0.583,
+   -6.75,
+   -0.872,
+   0.25
+  ],
+  [
+   -9.539,
+   -0.75,
+   -9.167,
+   -0.75,
+   0.25
+  ],
+  [
+   -9.167,
+   -0.75,
+   -7.654,
+   -0.75,
+   0.25
+  ],
+  [
+   -7.0,
+   -0.75,
+   -6.628,
+   -0.75,
+   0.25
+  ],
+  [
+   -6.807,
+   -0.75,
+   -4.826,
+   -0.75,
+   0.12
+  ],
+  [
+   -9.417,
+   -0.628,
+   -9.417,
+   -1.417,
+   0.25
+  ],
+  [
+   -9.417,
+   -1.417,
+   -9.417,
+   -3.083,
+   0.25
+  ],
+  [
+   -9.417,
+   -3.083,
+   -9.417,
+   -4.022,
+   0.25
+  ],
+  [
+   -4.883,
+   -3.39,
+   -4.883,
+   -2.95,
+   0.12
+  ],
+  [
+   -4.883,
+   -2.183,
+   -4.883,
+   -0.06,
+   0.12
+  ],
+  [
+   -4.94,
+   -1.717,
+   0.24,
+   -1.717,
+   0.12
+  ],
+  [
+   0.183,
+   -3.007,
+   0.183,
+   -2.55,
+   0.12
+  ],
+  [
+   0.183,
+   -1.8,
+   0.183,
+   -0.06,
+   0.12
+  ],
+  [
+   -1.85,
+   -1.774,
+   -1.85,
+   -0.06,
+   0.12
+  ],
+  [
+   0.126,
+   -1.583,
+   4.174,
+   -1.583,
+   0.12
+  ],
+  [
+   6.41,
+   -1.583,
+   6.917,
+   -1.583,
+   0.12
+  ],
+  [
+   7.65,
+   -1.583,
+   8.357,
+   -1.583,
+   0.12
+  ],
+  [
+   2.65,
+   -1.64,
+   2.65,
+   -0.06,
+   0.12
+  ],
+  [
+   4.117,
+   -1.64,
+   4.117,
+   -0.06,
+   0.12
+  ],
+  [
+   5.0,
+   -1.64,
+   5.0,
+   -0.06,
+   0.12
+  ],
+  [
+   6.467,
+   -1.64,
+   6.467,
+   -0.06,
+   0.12
+  ],
+  [
+   8.3,
+   -2.674,
+   8.3,
+   -2.45,
+   0.12
+  ],
+  [
+   8.3,
+   -1.7,
+   8.3,
+   -0.06,
+   0.12
+  ],
+  [
+   -4.94,
+   -0.117,
+   -4.467,
+   -0.117,
+   0.12
+  ],
+  [
+   -3.717,
+   -0.117,
+   -1.333,
+   -0.117,
+   0.12
+  ],
+  [
+   -0.583,
+   -0.117,
+   1.5,
+   -0.117,
+   0.12
+  ],
+  [
+   2.25,
+   -0.117,
+   3.017,
+   -0.117,
+   0.12
+  ],
+  [
+   3.017,
+   -0.117,
+   3.783,
+   -0.117,
+   0.12
+  ],
+  [
+   3.783,
+   -0.117,
+   4.2,
+   -0.117,
+   0.12
+  ],
+  [
+   4.933,
+   -0.117,
+   13.807,
+   -0.117,
+   0.12
+  ],
+  [
+   -3.383,
+   -0.174,
+   -3.383,
+   0.05,
+   0.12
+  ],
+  [
+   -3.383,
+   0.75,
+   -3.383,
+   3.24,
+   0.12
+  ],
+  [
+   -3.44,
+   0.85,
+   -2.917,
+   0.85,
+   0.12
+  ],
+  [
+   -2.217,
+   0.85,
+   1.717,
+   0.85,
+   0.12
+  ],
+  [
+   2.417,
+   0.85,
+   2.64,
+   0.85,
+   0.12
+  ],
+  [
+   -1.333,
+   0.793,
+   -1.333,
+   3.307,
+   0.12
+  ],
+  [
+   2.583,
+   0.753,
+   2.583,
+   2.833,
+   0.2
+  ],
+  [
+   2.583,
+   2.833,
+   2.583,
+   3.75,
+   0.2
+  ],
+  [
+   2.583,
+   3.75,
+   2.583,
+   4.097,
+   0.2
+  ],
+  [
+   2.486,
+   2.583,
+   3.383,
+   2.583,
+   0.2
+  ],
+  [
+   3.383,
+   2.583,
+   5.368,
+   2.583,
+   0.2
+  ],
+  [
+   6.25,
+   2.583,
+   7.147,
+   2.583,
+   0.2
+  ],
+  [
+   7.05,
+   0.92,
+   7.05,
+   2.883,
+   0.2
+  ],
+  [
+   7.05,
+   2.883,
+   7.05,
+   3.75,
+   0.2
+  ],
+  [
+   7.05,
+   3.75,
+   7.05,
+   4.097,
+   0.2
+  ],
+  [
+   6.993,
+   1.017,
+   7.583,
+   1.017,
+   0.12
+  ],
+  [
+   8.383,
+   1.017,
+   13.807,
+   1.017,
+   0.12
+  ],
+  [
+   -14.375,
+   -4.003,
+   -9.292,
+   -3.897,
+   0.25
+  ],
+  [
+   -14.242,
+   -4.125,
+   -14.758,
+   3.625,
+   0.25
+  ],
+  [
+   -14.875,
+   3.507,
+   -6.625,
+   3.026,
+   0.25
+  ]
+ ],
+ "views": [
+  {
+   "id": "aerial",
+   "title": "The whole floor from above",
+   "pos": [
+    19.0,
+    15.5,
+    15.5
+   ],
+   "target": [
+    1.2,
+    0.0,
+    -0.2
+   ],
+   "lens": 30,
+   "interior": false
+  },
+  {
+   "id": "kitchen-dining",
+   "title": "Kitchen, living and dining",
+   "pos": [
+    13.45,
+    1.5,
+    2.25
+   ],
+   "target": [
+    8.6,
+    0.95,
+    2.75
+   ],
+   "lens": 18,
+   "interior": true
+  },
+  {
+   "id": "kitchen-living",
+   "title": "Kitchen and living, apartment side",
+   "pos": [
+    13.45,
+    1.55,
+    -1.5
+   ],
+   "target": [
+    9.0,
+    0.95,
+    -1.6
+   ],
+   "lens": 18,
+   "interior": true
+  },
+  {
+   "id": "bedroom",
+   "title": "Bedroom 2",
+   "pos": [
+    2.25,
+    1.55,
+    1.75
+   ],
+   "target": [
+    -0.8,
+    0.75,
+    2.9
+   ],
+   "lens": 18,
+   "interior": true
+  },
+  {
+   "id": "ensuite",
+   "title": "Ensuite",
+   "pos": [
+    -2.95,
+    1.65,
+    -0.28
+   ],
+   "target": [
+    -4.6,
+    0.85,
+    -1.5
+   ],
+   "lens": 16,
+   "interior": true
+  },
+  {
+   "id": "corridor",
+   "title": "Corridor from the front door",
+   "pos": [
+    12.4,
+    1.6,
+    0.5
+   ],
+   "target": [
+    -2.0,
+    1.25,
+    0.5
+   ],
+   "lens": 22,
+   "interior": true
+  },
+  {
+   "id": "garden",
+   "title": "Garden yard and patio",
+   "pos": [
+    -13.9,
+    1.7,
+    2.85
+   ],
+   "target": [
+    -7.5,
+    0.9,
+    -1.0
+   ],
+   "lens": 20,
+   "interior": false
+  }
+ ],
+ "finishes": {
+  "oak": 2.0,
+  "walnut": 2.0,
+  "maltese": 0.8,
+  "terrazzo": 1.5,
+  "porcelain": 1.2,
+  "marble": 2.0,
+  "concrete": 2.0,
+  "limestone": 3.0,
+  "terracotta": 1.2,
+  "pebble": 1.0
+ }
+}
