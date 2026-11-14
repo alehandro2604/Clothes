@@ -449,8 +449,10 @@ function ensureComposer() {
 const ldBar = $('#ldBar'), ldPct = $('#ldPct');
 const setLoad = (f) => { ldBar.style.width = (f * 100).toFixed(0) + '%'; ldPct.textContent = (f * 100).toFixed(0) + '%'; };
 const data = await (await fetch('scene.json')).json();
-const gltf = await new Promise((res, rej) => new GLTFLoader().load('flat.glb', res,
-  (e) => { if (e.total) setLoad(e.loaded / e.total * .95); }, rej)).catch((e) => {
+// The published page serves the model as flat.glb.wasm (artifacts don't serve .glb); locally it's flat.glb.
+const loadGlb = (url) => new Promise((res, rej) => new GLTFLoader().load(url, res,
+  (e) => { if (e.total) setLoad(e.loaded / e.total * .95); }, rej));
+const gltf = await loadGlb('flat.glb.wasm').catch(() => loadGlb('flat.glb')).catch((e) => {
   $('#loader .in').innerHTML = '<b>The model did not load</b><p>flat.glb could not be fetched. Reload the page to try again.</p>';
   throw e;
 });
