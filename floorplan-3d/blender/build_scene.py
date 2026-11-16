@@ -193,6 +193,13 @@ def build_materials():
     pmat("Book2", "#2E4A5E", 0.8)
     pmat("Book3", "#C9B48A", 0.8)
     pmat("Stone", "#D8C8A6", 0.8, tex="limestone")
+    pmat("StoneLight", "#E6DBC0", 0.85)
+    pmat("StoneDark", "#B9A983", 0.9)
+    pmat("Neighbor", "#DCCFAF", 0.92)
+    pmat("NeighborB", "#E7DFCB", 0.92)
+    pmat("DoorBlue", "#2E4A66", 0.4)
+    pmat("DoorRed", "#8A2E2A", 0.4)
+    pmat("WallLight", "#FFF1DC", 0.4, emit="#FFD9A6", emit_strength=5.0)
     pmat("Water", "#7FB2BF", 0.05, transmission=0.6)
     for f in TILE_METERS:
         pmat("Tex_" + f, "#ffffff", {"marble": 0.15, "porcelain": 0.25, "maltese": 0.35,
@@ -715,7 +722,26 @@ def build_walls():
     # door leaves, slightly open
     for i, (hinge, u, n, w, t, kind) in enumerate(leaves):
         b = Builder()
-        open_deg = 70 if kind != "front" else 85
+        if kind == "front":
+            # built closed around its hinge; the object's rotation opens it, so the
+            # web viewer can animate the swing
+            ang0 = math.degrees(math.atan2(u.y, u.x))
+            side = Vector((-u.y, u.x))
+            c = u * (w / 2)
+            b.boxr((c.x, c.y, 1.04), (w, 0.05, 2.06), "FrontDoor", rot=(0, 0, ang0))
+            for s_ in (1, -1):
+                for zc, zh in ((0.55, 0.62), (1.45, 0.86)):
+                    q = c + side * 0.028 * s_
+                    b.rbox((q.x, q.y, zc), (w - 0.22, 0.012, zh), "FrontDoor", rot=(0, 0, ang0), e=0.12, n=16)
+                q = u * (w - 0.1) + side * 0.045 * s_
+                b.sph(q.x, q.y, 1.02, 0.035, "Brass", n=12)
+            q = c - side * 0.04
+            b.rbox((q.x, q.y, 1.5), (0.09, 0.02, 0.16), "Brass", rot=(0, 0, ang0), e=0.5, n=12)
+            hinge_off = hinge + n * (t / 2 - 0.03)
+            sign = 1 if (u.x * n.y - u.y * n.x) > 0 else -1
+            b.build("door_front", loc=(hinge_off.x, hinge_off.y, 0), rotz=sign * 85, collection=co, bevel=0.004)
+            continue
+        open_deg = 70
         mat = {"front": "FrontDoor", "aptdoor": "Walnut"}.get(kind, "DoorWhite")
         dirv = (u * math.cos(math.radians(open_deg)) + n * math.sin(math.radians(open_deg)))
         hinge_off = hinge + n * (t / 2 - 0.02)
@@ -1383,6 +1409,106 @@ def place_furniture():
     return items
 
 
+# ------------------------------------------------------------------ facade
+def build_facade():
+    """Limestone street front: cladding, surrounds, wall lights; plus an upper
+    storey with a Maltese gallarija and neighbouring fronts (street set)."""
+    cf = coll("Facade")
+    X0, X1 = bx(1790) + 0.15, bx(1790) + 0.21
+    Yb, Yt = by(845) - 0.15, by(448) + 0.15
+    ops = [(by(820), by(690), 0.9, 2.2, "win"), (by(660), by(607), 0.0, 2.1, "door"), (by(575), by(475), 0.9, 2.2, "win")]
+    f = Builder()
+    cur = Yb
+    for lo, hi, z0, z1, kind in ops:
+        f.box(X0, X1, cur, lo, 0, 2.8, "Stone")
+        if z0 > 0:
+            f.box(X0, X1, lo, hi, 0, z0, "Stone")
+        f.box(X0, X1, lo, hi, z1, 2.8, "Stone")
+        # surround
+        f.box(X0, X1 + 0.04, lo - 0.13, lo, z0, z1 + 0.14, "StoneLight")
+        f.box(X0, X1 + 0.04, hi, hi + 0.13, z0, z1 + 0.14, "StoneLight")
+        f.box(X0, X1 + 0.05, lo - 0.16, hi + 0.16, z1, z1 + 0.16, "StoneLight")
+        if kind == "win":
+            f.box(X0, X1 + 0.09, lo - 0.16, hi + 0.16, z0 - 0.09, z0, "StoneLight")
+        cur = hi
+    f.box(X0, X1, cur, Yt, 0, 2.8, "Stone")
+    f.box(X1, X1 + 0.02, Yb, ops[0][0] - 0.16, 0, 0.4, "StoneDark")
+    f.box(X1, X1 + 0.02, ops[0][1] + 0.16, ops[1][0] - 0.13, 0, 0.4, "StoneDark")
+    f.box(X1, X1 + 0.02, ops[1][1] + 0.13, ops[2][0] - 0.16, 0, 0.4, "StoneDark")
+    f.box(X1, X1 + 0.02, ops[2][1] + 0.16, Yt, 0, 0.4, "StoneDark")
+    d_lo, d_hi = ops[1][0], ops[1][1]
+    for y in (d_lo - 0.36, d_hi + 0.36):
+        f.box(X1, X1 + 0.03, y - 0.05, y + 0.05, 1.2, 1.9, "Frame")
+        f.box(X1 + 0.03, X1 + 0.06, y - 0.025, y + 0.025, 1.25, 1.85, "WallLight")
+    f.box(X1, X1 + 0.012, d_hi + 0.55, d_hi + 0.75, 1.55, 1.7, "Brass")
+    f.build("Facade", collection=cf, bevel=0.004)
+
+    u = Builder()
+    u.box(X0, X1, Yb, Yt, 2.8, 6.4, "Stone")
+    u.box(X0, X1 + 0.08, Yb, Yt, 2.8, 2.96, "StoneLight")
+    u.box(X0, X1 + 0.2, Yb, Yt, 6.3, 6.5, "StoneLight")
+    u.box(X0, X1, Yb, Yt, 6.5, 7.0, "Stone")
+    # gallarija (enclosed timber balcony)
+    g0, g1 = -2.45, 0.15
+    gx = X1 + 0.66
+    for y in (g0 + 0.25, (g0 + g1) / 2, g1 - 0.25):
+        u.box(X1, X1 + 0.5, y - 0.09, y + 0.09, 3.0, 3.26, "StoneLight")
+    u.box(X1, gx + 0.04, g0 - 0.05, g1 + 0.05, 3.26, 3.36, "StoneLight")
+    u.box(gx - 0.05, gx, g0, g1, 3.36, 4.15, "FrontDoor")
+    u.box(X1, gx, g0, g0 + 0.05, 3.36, 4.15, "FrontDoor")
+    u.box(X1, gx, g1 - 0.05, g1, 3.36, 4.15, "FrontDoor")
+    n = 6
+    for i in range(n + 1):
+        y = g0 + (g1 - g0) * i / n
+        u.box(gx - 0.05, gx, y - 0.03, y + 0.03, 4.15, 5.5, "FrontDoor")
+    for i in range(n):
+        y = g0 + (g1 - g0) * (i + 0.5) / n
+        u.rbox((gx - 0.02, y, 3.75), (0.02, (g1 - g0) / n - 0.12, 0.6), "FrontDoor", e=0.15, n=12)
+    u.box(gx - 0.045, gx - 0.005, g0, g1, 4.82, 4.88, "FrontDoor")
+    u.box(gx - 0.03, gx - 0.02, g0, g1, 4.15, 5.5, "Glass")
+    for y in (g0, g1 - 0.05):
+        u.box(X1, gx, y, y + 0.05, 4.15, 4.2, "FrontDoor")
+        u.box(X1 + 0.3, X1 + 0.35, y, y + 0.05, 4.15, 5.5, "FrontDoor")
+        u.box(X1, gx, y + 0.02, y + 0.03, 4.2, 5.5, "Glass")
+    u.box(X1, gx + 0.02, g0 - 0.02, g1 + 0.02, 5.5, 5.66, "FrontDoor")
+    u.box(X1, gx + 0.09, g0 - 0.09, g1 + 0.09, 5.66, 5.74, "StoneLight")
+    u.box(X1, X1 + 0.006, g0 + 0.5, g1 - 0.5, 3.4, 5.4, "BlackGlass")
+    # shuttered windows either side
+    for (w0, w1) in ((0.95, 1.9), (-3.85, -3.0)):
+        u.box(X1, X1 + 0.008, w0, w1, 3.6, 5.3, "BlackGlass")
+        u.box(X1, X1 + 0.04, w0 - 0.12, w0, 3.6, 5.44, "StoneLight")
+        u.box(X1, X1 + 0.04, w1, w1 + 0.12, 3.6, 5.44, "StoneLight")
+        u.box(X1, X1 + 0.05, w0 - 0.15, w1 + 0.15, 5.3, 5.46, "StoneLight")
+        u.box(X1, X1 + 0.09, w0 - 0.15, w1 + 0.15, 3.52, 3.6, "StoneLight")
+        hw = (w1 - w0) / 2
+        for s0 in (w0 - 0.12 - hw, w1 + 0.12):
+            u.box(X1, X1 + 0.035, s0, s0 + hw, 3.6, 5.3, "FrontDoor")
+            for k in range(9):
+                z = 3.7 + k * 0.18
+                u.box(X1 + 0.035, X1 + 0.045, s0 + 0.05, s0 + hw - 0.05, z, z + 0.05, "FrontDoor")
+    u.build("streetset_upper", collection=cf, bevel=0.004)
+
+    nb = Builder()
+    # left neighbour (taller) and right neighbour (same height), as shallow street fronts
+    for (y0, y1, hgt, mat, door, dy) in ((Yt, Yt + 7.5, 9.2, "Neighbor", "DoorBlue", 1.6),
+                                         (Yb - 7.0, Yb, 7.0, "NeighborB", "DoorRed", 4.6)):
+        nb.box(X0 - 1.0, X1 - 0.02, y0, y1, 0, hgt, mat)
+        nb.box(X0, X1 + 0.12, y0, y1, hgt - 0.25, hgt - 0.05, "StoneLight")
+        nb.box(X1 - 0.02, X1 + 0.03, y0 + dy, y0 + dy + 1.0, 0, 2.3, door)
+        nb.box(X1 - 0.02, X1 + 0.05, y0 + dy - 0.14, y0 + dy + 1.14, 2.3, 2.46, "StoneLight")
+        for fl in range(int((hgt - 0.6) // 3.0)):
+            for wy in (0.9, 3.6, 5.6):
+                if fl == 0 and abs(wy - dy) < 1.3:
+                    continue
+                if y0 + wy + 1.0 > y1 - 0.3:
+                    continue
+                z = 0.95 + fl * 3.05
+                nb.box(X1 - 0.02, X1 - 0.012, y0 + wy, y0 + wy + 1.0, z, z + 1.5, "BlackGlass")
+                nb.box(X1 - 0.02, X1 + 0.07, y0 + wy - 0.12, y0 + wy + 1.12, z - 0.08, z, "StoneLight")
+                nb.box(X1 - 0.02, X1 + 0.03, y0 + wy - 0.12, y0 + wy + 1.12, z + 1.5, z + 1.62, "StoneLight")
+    nb.build("streetset_neighbors", collection=cf, bevel=0.004)
+
+
 # ------------------------------------------------------------ lights/cams
 def build_lights(rooms):
     cl = coll("Lights")
@@ -1532,6 +1658,7 @@ def main():
     build_materials()
     rooms = build_floors()
     build_walls()
+    build_facade()
     items = place_furniture()
     build_lights(rooms)
     build_cameras()

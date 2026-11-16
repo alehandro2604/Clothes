@@ -125,6 +125,8 @@ def configure(view):
     for ob in bpy.data.objects:
         if ob.name.startswith("ceil_"):
             ob.hide_render = not interior
+        if ob.name.startswith("streetset"):
+            ob.hide_render = True
         if ob.type == "LIGHT" and ob.name.startswith(("Ceil_", "Lamp_", "Down_")):
             ob.hide_render = not interior
     set_emission("LampShade", 1.5 if interior else 0.0)
